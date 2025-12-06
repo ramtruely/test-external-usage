@@ -33,9 +33,10 @@ pipeline {
                 script {
                     // AUTO-LOAD all groovy files from jenkins/ folder
                     libs = [:]
-                    new File("${env.WORKSPACE}/vars").eachFileMatch(~/.*\.groovy/) { file ->
+                    def files = findFiles(glob: 'jenkins/*.groovy')
+                    files.each { file ->
                         def name = file.name.replace('.groovy','')
-                        libs[name] = load "vars/${file.name}"
+                        libs[name] = load file.path
                     }
                 }
             }
