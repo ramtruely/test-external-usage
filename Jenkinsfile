@@ -49,7 +49,7 @@ pipeline {
                     echo util.getEnvInfo()
 
                     def helper = libs.loader.get('Helper', 'Ram')
-                    helper.greet()
+                    helper.greet(env)
                     echo helper.getUserInfo()
                 }
             }
