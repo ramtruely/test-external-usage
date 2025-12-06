@@ -9,7 +9,7 @@ pipeline {
         stage('init parameters') {
             steps {
                 script {
-                    config = readYaml file: 'parameters.yaml'
+                    config = readYaml file: 'devops/parameters.yaml'
 
                     def paramList = []
                     config.parameters.each { name, map ->
