@@ -7,11 +7,7 @@ class Helper implements Serializable {
         this.name = name
     }
 
-    def greet() {
-        println "Hi ${name}!"
-    }
-
-    def staticGreet() {
-        println "Static greet from Helper"
+    def doSomethingElse() {
+        return "Helper processing for: ${name}"
     }
 }
