@@ -1,20 +1,18 @@
-// src/org/my/example/MyHelper.groovy
-import java.io.Serializable
+package helper
 
 class MyHelper implements Serializable {
-    def steps  // reference to Jenkins pipeline steps
+    def script
 
-    MyHelper(steps) {
-        this.steps = steps
+    MyHelper(script) {
+        this.script = script
     }
 
     def printEnv() {
-        steps.echo "Workspace: ${steps.env.WORKSPACE}"
-        steps.echo "Build Number: ${steps.env.BUILD_NUMBER}"
+        script.echo "Workspace: ${script.env.WORKSPACE}"
+        script.echo "Build Number: ${script.env.BUILD_NUMBER}"
     }
 
     def printMessage(String msg) {
-        steps.echo "Message: ${msg}"
+        script.echo "Message: ${msg}"
     }
 }
-return this
