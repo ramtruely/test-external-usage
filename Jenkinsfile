@@ -40,17 +40,21 @@ pipeline {
                 }
             }
         }
-        stage('use-src-classes') {
+         stage('Init src') {
             steps {
                 script {
-                    // get instances from loader (no classloader usage)
-                    def util = libs.loader.get('Utility', 'DEV')
-                    util.printEnv(env)
-                    echo util.getEnvInfo()
+                    // Load MyHelper and MyUtility
+                    def helper = load 'src/org/my/example/MyHelper.groovy'
+                    def util = load 'src/org/my/example/MyUtility.groovy'
 
-                    def helper = libs.loader.get('Helper', 'Ram')
-                    helper.greet(env)
-                    echo helper.getUserInfo()
+                    // Call helper methods
+                    helper.printEnv()
+                    helper.sayHello('Ram')
+
+                    // Call utility methods
+                    util.printMessage("Starting the pipeline!")
+                    int sum = util.addNumbers(10, 20)
+                    util.fileExists("${env.WORKSPACE}/Jenkinsfile")
                 }
             }
         }
