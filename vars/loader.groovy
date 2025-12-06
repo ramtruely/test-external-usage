@@ -1,14 +1,10 @@
-// vars/loader.groovy
+// sandbox-safe loader.groovy
+def loadClasses() {
+    def classesMap = [:]
 
-// Method to load a class from src/com/mntz dynamically
-def get(className, Object... args) {
-    // Full package name
-    def fullClassName = "com.mntz.${className}"
-    // Load class
-    def cls = this.class.classLoader.loadClass(fullClassName)
-    // Instantiate with constructor arguments
-    return cls.newInstance(*args)
+    // Instantiate classes directly
+    classesMap['Utility'] = new com.mntz.Utility("DEV")
+    classesMap['Helper']  = new com.mntz.Helper("Ram")
+
+    return classesMap
 }
-
-// Return this object to make methods accessible
-return this
