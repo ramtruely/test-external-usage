@@ -1,5 +1,5 @@
 def libs
-def classes
+def classesMap
 def config
 
 pipeline {
@@ -10,6 +10,7 @@ pipeline {
         stage('init parameters') {
             steps {
                 script {
+                    // Read YAML parameters
                     config = readYaml file: 'devops/parameters.yaml'
 
                     def paramList = []
@@ -22,14 +23,12 @@ pipeline {
                         }
                     }
 
-                    properties([
-                        parameters(paramList)
-                    ])
+                    properties([parameters(paramList)])
                 }
             }
         }
 
-        stage("init scripts") {
+        stage("init libs") {
             steps {
                 script {
                     // AUTO-LOAD all groovy files from vars/
@@ -39,13 +38,22 @@ pipeline {
                         def name = file.name.replace('.groovy','')
                         libs[name] = load file.path
                     }
+                }
+            }
+        }
 
-                    // AUTO-COMPILE all classes from src/com/mntz/
-                    classes = [:]
+        stage("load classes") {
+            steps {
+                script {
+                    // AUTO-LOAD all groovy classes from src/com/mntz/
+                    def loader = new GroovyClassLoader(this.class.classLoader)
+                    classesMap = [:]
+
                     def srcFiles = findFiles(glob: 'src/com/mntz/*.groovy')
                     srcFiles.each { file ->
-                        def className = file.name.replace('.groovy','')
-                        classes[className] = evaluate(file.path)
+                        loader.parseClass(new File(file.path))
+                        def className = "com.mntz." + file.name.replace('.groovy','')
+                        classesMap[file.name.replace('.groovy','')] = Class.forName(className)
                     }
                 }
             }
@@ -61,9 +69,7 @@ pipeline {
 
         stage("test") {
             when {
-                expression {
-                    params.executeTests
-                }
+                expression { params.executeTests }
             }
             steps {
                 script {
@@ -91,16 +97,14 @@ pipeline {
         stage("use classes") {
             steps {
                 script {
-                    // Instantiate classes from src/com/mntz
-                    def utility = new classes.Utility("DEV")
+                    // Instantiate and use your classes
+                    def utility = classesMap.Utility.newInstance("DEV")
                     utility.printEnv()
-                    utility.staticHello()
 
-                    def helper = new classes.Helper("Ram")
+                    def helper = classesMap.Helper.newInstance("Ram")
                     helper.greet()
-                    helper.staticGreet()
                 }
             }
         }
-    }   
+    }
 }
