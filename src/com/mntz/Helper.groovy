@@ -1,5 +1,3 @@
-package com.mntz
-
 class Helper implements Serializable {
     String name
 
