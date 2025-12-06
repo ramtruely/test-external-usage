@@ -1,93 +1,63 @@
-def libs
-def config
-
 pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-        stage('init parameters') {
+        stage('Init') {
             steps {
                 script {
-                    config = readYaml file: 'devops/parameters.yaml'
+                    // Load other Groovy vars
+                    def buildVar = load('vars/build.groovy')
+                    def deployVar = load('vars/deploy.groovy')
+                    def testVar = load('vars/test.groovy')
+                    def validateVar = load('vars/validate.groovy')
+                    def loaderVar = load('vars/loader.groovy')
 
-                    def paramList = []
-                    config.parameters.each { name, map ->
-                        if (map.type == 'choice') {
-                            paramList << choice(name: name, choices: map.values.join('\n'))
-                        }
-                        if (map.type == 'boolean') {
-                            paramList << booleanParam(name: name, defaultValue: map.default)
-                        }
-                    }
-
-                    properties([
-                        parameters(paramList)
-                    ])
+                    // Load classes safely
+                    def classes = loaderVar.loadClasses()
+                    env.utility = classes['Utility']
+                    env.helper  = classes['Helper']
                 }
             }
         }
 
-        stage("init libs") {
+        stage('Build') {
             steps {
                 script {
-                    // AUTO-LOAD all groovy files from vars/
-                    libs = [:]
-                    def files = findFiles(glob: 'vars/*.groovy')
-                    files.each { file ->
-                        def name = file.name.replace('.groovy','')
-                        libs[name] = load file.path
-                    }
+                    echo "Building the application..."
                 }
             }
         }
 
-        stage("build") {
+        stage('Test') {
             steps {
                 script {
-                    libs.build.buildApp()
+                    echo "Testing the application..."
+                    echo env.utility.doSomething()
+                    echo env.helper.doSomethingElse()
                 }
             }
         }
 
-        stage("test") {
-            when {
-                expression {
-                    params.executeTests
-                }
-            }
+        stage('Deploy') {
             steps {
                 script {
-                    libs.test.testApp()
+                    echo "Deploying the application..."
+                    echo "Deploying version 1.0.0"
                 }
             }
         }
 
-        stage("deploy") {
+        stage('Validate') {
             steps {
                 script {
-                    libs.deploy.deployApp()
-                }
-            }
-        }
-
-        stage("validate") {
-            steps {
-                script {
-                    libs.validate.validateApp()
-                }
-            }
-        }
-
-        stage("use classes") {
-            steps {
-                script {
-                    // Use loader to instantiate classes from src/com/mntz
-                    def utility = libs.loader.get("Utility", "DEV")
-                    utility.doSomething()
-
-                    def helper = libs.loader.get("Helper", "Ram")
-                    helper.doSomethingElse()
+                    echo "Validating the application..."
+                    echo "Validating version 1.0.0"
                 }
             }
         }
