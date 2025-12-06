@@ -1,5 +1,4 @@
 def libs
-def classesMap
 def config
 
 pipeline {
@@ -10,7 +9,6 @@ pipeline {
         stage('init parameters') {
             steps {
                 script {
-                    // Read YAML parameters
                     config = readYaml file: 'devops/parameters.yaml'
 
                     def paramList = []
@@ -42,23 +40,6 @@ pipeline {
             }
         }
 
-        stage("load classes") {
-            steps {
-                script {
-                    // AUTO-LOAD all groovy classes from src/com/mntz/
-                    def loader = new GroovyClassLoader(this.class.classLoader)
-                    classesMap = [:]
-
-                    def srcFiles = findFiles(glob: 'src/com/mntz/*.groovy')
-                    srcFiles.each { file ->
-                        loader.parseClass(new File(file.path))
-                        def className = "com.mntz." + file.name.replace('.groovy','')
-                        classesMap[file.name.replace('.groovy','')] = Class.forName(className)
-                    }
-                }
-            }
-        }
-
         stage("build") {
             steps {
                 script {
@@ -69,7 +50,9 @@ pipeline {
 
         stage("test") {
             when {
-                expression { params.executeTests }
+                expression {
+                    params.executeTests
+                }
             }
             steps {
                 script {
@@ -97,14 +80,17 @@ pipeline {
         stage("use classes") {
             steps {
                 script {
-                    // Instantiate and use your classes
-                    def utility = classesMap.Utility.newInstance("DEV")
-                    utility.printEnv()
+                    // Use loader to get instances of src/com/mntz classes
+                    def loader = libs.loader
 
-                    def helper = classesMap.Helper.newInstance("Ram")
-                    helper.greet()
+                    def utility = loader.get("Utility", "DEV")
+                    def helper  = loader.get("Helper", "Ram")
+
+                    // Call methods on instances
+                    utility.doSomething()
+                    helper.doSomethingElse()
                 }
             }
         }
-    }
+    }   
 }
