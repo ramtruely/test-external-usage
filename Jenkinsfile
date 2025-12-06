@@ -1,8 +1,6 @@
-def libs        // for vars/*.groovy
-def classes     // for src/com/mntz/*.groovy
+def libs
+def classes
 def config
-def utility
-def helper
 
 pipeline {
     agent any
@@ -31,12 +29,10 @@ pipeline {
             }
         }
 
-        stage("init") {
+        stage("init scripts") {
             steps {
                 script {
-                    // -----------------------------
-                    // AUTO-LOAD all groovy files from vars/ folder
-                    // -----------------------------
+                    // AUTO-LOAD all groovy files from vars/
                     libs = [:]
                     def files = findFiles(glob: 'vars/*.groovy')
                     files.each { file ->
@@ -44,22 +40,13 @@ pipeline {
                         libs[name] = load file.path
                     }
 
-                    // -----------------------------
-                    // AUTO-LOAD all classes from src/com/mntz/ folder
-                    // -----------------------------
+                    // AUTO-COMPILE all classes from src/com/mntz/
                     classes = [:]
-                    def classFiles = findFiles(glob: 'src/com/mntz/*.groovy')
-                    classFiles.each { file ->
+                    def srcFiles = findFiles(glob: 'src/com/mntz/*.groovy')
+                    srcFiles.each { file ->
                         def className = file.name.replace('.groovy','')
-                        def classScript = load file.path
-                        classes[className] = classScript
+                        classes[className] = evaluate(file.path)
                     }
-
-                    // -----------------------------
-                    // Instantiate classes if needed
-                    // -----------------------------
-                    utility = new com.mntz.Utility("DEV")
-                    helper = new com.mntz.Helper("Ram")
                 }
             }
         }
@@ -74,7 +61,9 @@ pipeline {
 
         stage("test") {
             when {
-                expression { params.executeTests }
+                expression {
+                    params.executeTests
+                }
             }
             steps {
                 script {
@@ -102,17 +91,16 @@ pipeline {
         stage("use classes") {
             steps {
                 script {
-                    // Example usage of classes from src/com/mntz/
-                    
-                    // Instance methods
+                    // Instantiate classes from src/com/mntz
+                    def utility = new classes.Utility("DEV")
                     utility.printEnv()
-                    helper.greet()
+                    utility.staticHello()
 
-                    // Static methods
-                    com.mntz.Utility.staticHello()
-                    com.mntz.Helper.staticGreet()
+                    def helper = new classes.Helper("Ram")
+                    helper.greet()
+                    helper.staticGreet()
                 }
             }
         }
-    }
+    }   
 }
