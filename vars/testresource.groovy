@@ -1,6 +1,5 @@
 def call() {
-    // Read resource file located in resources/sample.txt
-    def content = libraryResource 'sample.txt'
-    echo "Resource Content => ${content}"
+    // load the resource file inside pipeline clone workspace
+    def content = readFile "resources/sample.txt"
+    echo "Sample.txt content:\n${content}"
 }
-return this
