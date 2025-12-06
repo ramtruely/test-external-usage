@@ -1,24 +1,21 @@
-package org.my.example
+// src/org/my/example/MyUtility.groovy
+import java.io.Serializable
 
-class MyUtility {
+class MyUtility implements Serializable {
+    def steps
 
-    // Print a custom message
-    def printMessage(String message) {
-        println "Message: ${message}"
+    MyUtility(steps) {
+        this.steps = steps
     }
 
-    // Example: simple addition method
-    def addNumbers(int a, int b) {
-        int result = a + b
-        println "Addition Result: ${result}"
-        return result
+    def listFiles(String dirPath) {
+        def files = steps.sh(script: "ls -1 ${dirPath}", returnStdout: true).trim().split("\n")
+        return files
     }
 
-    // Example: check if a file exists in workspace
-    def fileExists(String filePath) {
-        def file = new File(filePath)
-        boolean exists = file.exists()
-        println "File '${filePath}' exists? ${exists}"
-        return exists
+    def printFiles(String dirPath) {
+        def files = listFiles(dirPath)
+        files.each { steps.echo it }
     }
 }
+return this
