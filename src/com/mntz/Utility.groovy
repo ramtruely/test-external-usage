@@ -1,17 +1,17 @@
 package com.mntz
 
-class Utility {
-    def env
+class Utility implements Serializable {
+    String env
 
-    Utility(env) {
+    Utility(String env) {
         this.env = env
     }
 
     def printEnv() {
-        println "Environment is: ${env}"
+        println "Current environment is ${env}"
     }
 
-    static def staticHello() {
-        println "Hello from Utility.staticHello()"
+    def staticHello() {
+        println "Hello from Utility"
     }
 }
