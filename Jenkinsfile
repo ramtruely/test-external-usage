@@ -43,14 +43,13 @@ pipeline {
          stage('Init src') {
             steps {
                 script {
-                    // Load helper
-                    def helper = load 'src/org/my/example/MyHelper.groovy'
-                    def myHelper = new helper.MyHelper(this)
+                    // Use loader to get instances
+                    def myHelper = loader.loadHelper(this)
+                    def myUtil = loader.loadUtility(this)
+
                     myHelper.printEnv()
-                    
-                    // Load utility
-                    def util = load 'src/org/my/example/MyUtility.groovy'
-                    def myUtil = new util.MyUtility(this)
+                    myHelper.printMessage("Hello from Loader!")
+
                     myUtil.printFiles("${env.WORKSPACE}")
                 }
             }
