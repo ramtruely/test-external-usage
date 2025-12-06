@@ -1,57 +1,87 @@
+def libs
+def config
+
 pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
-        stage('Init') {
+        stage('init parameters') {
             steps {
                 script {
-                    def loaderVar = load('crc/com/loader.groovy')
-                    def classes = loaderVar.loadClasses()
+                    config = readYaml file: 'devops/parameters.yaml'
 
-                    env.utility = classes['Utility']
-                    env.helper  = classes['Helper']
+                    def paramList = []
+                    config.parameters.each { name, map ->
+                        if (map.type == 'choice') {
+                            paramList << choice(name: name, choices: map.values.join('\n'))
+                        }
+                        if (map.type == 'boolean') {
+                            paramList << booleanParam(name: name, defaultValue: map.default)
+                        }
+                    }
+
+                    properties([
+                        parameters(paramList)
+                    ])
                 }
             }
         }
 
-        stage('Build') {
+        stage("init") {
             steps {
                 script {
-                    echo "Building the application..."
+                    libs = [:]
+                    def files = findFiles(glob: 'vars/*.groovy')
+                    files.each { file ->
+                        def name = file.name.replace('.groovy','')
+                        libs[name] = load file.path
+                    }
                 }
             }
         }
 
-        stage('Test') {
+        stage("resource-test") {
             steps {
                 script {
-                    echo "Testing the application..."
-                    echo env.utility.doSomething()
-                    echo env.helper.doSomethingElse()
+                    libs.testresource()
                 }
             }
         }
 
-        stage('Deploy') {
+        stage("build") {
             steps {
                 script {
-                    echo "Deploying the application..."
-                    echo "Deploying version 1.0.0"
+                    libs.build.buildApp()
                 }
             }
         }
 
-        stage('Validate') {
+        stage("test") {
+            when {
+                expression {
+                    params.executeTests
+                }
+            }
             steps {
                 script {
-                    echo "Validating the application..."
-                    echo "Validating version 1.0.0"
+                    libs.test.testApp()
+                }
+            }
+        }
+
+        stage("deploy") {
+            steps {
+                script {
+                    libs.deploy.deployApp()
+                }
+            }
+        }
+
+        stage("validate") {
+            steps {
+                script {
+                    libs.validate.validateApp()
                 }
             }
         }
