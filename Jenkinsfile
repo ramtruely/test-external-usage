@@ -43,18 +43,15 @@ pipeline {
          stage('Init src') {
             steps {
                 script {
-                    // Load MyHelper and MyUtility
+                    // Load helper
                     def helper = load 'src/org/my/example/MyHelper.groovy'
+                    def myHelper = new helper.MyHelper(this)
+                    myHelper.printEnv()
+                    
+                    // Load utility
                     def util = load 'src/org/my/example/MyUtility.groovy'
-
-                    // Call helper methods
-                    helper.printEnv()
-                    helper.sayHello('Ram')
-
-                    // Call utility methods
-                    util.printMessage("Starting the pipeline!")
-                    int sum = util.addNumbers(10, 20)
-                    util.fileExists("${env.WORKSPACE}/Jenkinsfile")
+                    def myUtil = new util.MyUtility(this)
+                    myUtil.printFiles("${env.WORKSPACE}")
                 }
             }
         }
