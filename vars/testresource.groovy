@@ -3,3 +3,4 @@ def testResource() {
     def content = readFile "resources/sample.txt"
     echo "Sample.txt content:\n${content}"
 }
+return this
