@@ -1,12 +1,19 @@
-class HelperImpl implements Serializable {
-    String name
-    HelperImpl(String name) { this.name = name }
-    def greet() { println "Hello, ${name}!" }
-    def getUserInfo() { return "User info: ${name}" }
-}
+package org.my.example
 
-def create(String name) {
-    return new HelperImpl(name)
-}
+// Non-shared lib, sandbox-safe helper
+class MyHelper {
 
-return this
+    // Prints some basic environment variables
+    def printEnv() {
+        // env is automatically visible in Jenkins pipeline context
+        println "JOB_NAME: ${env.JOB_NAME}"
+        println "BUILD_NUMBER: ${env.BUILD_NUMBER}"
+        println "NODE_NAME: ${env.NODE_NAME}"
+        println "WORKSPACE: ${env.WORKSPACE}"
+    }
+
+    // Example method to simulate some logic
+    def sayHello(String name) {
+        println "Hello, ${name}! Welcome to Jenkins."
+    }
+}
