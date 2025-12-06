@@ -1,12 +1,17 @@
 package com.mntz
 
 class Utility {
+    def env
 
-    def echoMsg(String msg) {
-        println "Utility instance says: ${msg}"
+    Utility(env) {
+        this.env = env
     }
 
-    def addNumbers(int a, int b) {
-        return a + b
+    def printEnv() {
+        println "Environment is: ${env}"
+    }
+
+    static def staticHello() {
+        println "Hello from Utility.staticHello()"
     }
 }
