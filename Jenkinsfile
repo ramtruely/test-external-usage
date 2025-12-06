@@ -48,6 +48,13 @@ pipeline {
                 }
             }
         }
+        stage("test-sh") {
+            steps {
+                script {
+                    libs.testsh.runTestSh()
+        }
+    }
+}
 
         stage("build") {
             steps {
