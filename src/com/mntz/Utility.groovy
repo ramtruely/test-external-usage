@@ -1,5 +1,3 @@
-package com.mntz
-
 class Utility implements Serializable {
     String env
 
