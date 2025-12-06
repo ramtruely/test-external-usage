@@ -1,17 +1,17 @@
 package com.mntz
 
-class Helper {
-    def name
+class Helper implements Serializable {
+    String name
 
-    Helper(name) {
+    Helper(String name) {
         this.name = name
     }
 
     def greet() {
-        println "Greetings, ${name}!"
+        println "Hi ${name}!"
     }
 
-    static def staticGreet() {
-        println "Hello from Helper.staticGreet()"
+    def staticGreet() {
+        println "Static greet from Helper"
     }
 }
