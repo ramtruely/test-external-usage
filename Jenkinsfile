@@ -21,7 +21,9 @@ pipeline {
                         }
                     }
 
-                    properties([parameters(paramList)])
+                    properties([
+                        parameters(paramList)
+                    ])
                 }
             }
         }
@@ -80,17 +82,14 @@ pipeline {
         stage("use classes") {
             steps {
                 script {
-                    // Use loader to get instances of src/com/mntz classes
-                    def loader = libs.loader
-
-                    def utility = loader.get("Utility", "DEV")
-                    def helper  = loader.get("Helper", "Ram")
-
-                    // Call methods on instances
+                    // Use loader to instantiate classes from src/com/mntz
+                    def utility = libs.loader.get("Utility", "DEV")
                     utility.doSomething()
+
+                    def helper = libs.loader.get("Helper", "Ram")
                     helper.doSomethingElse()
                 }
             }
         }
-    }   
+    }
 }
