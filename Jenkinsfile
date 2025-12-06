@@ -44,7 +44,7 @@ pipeline {
         stage("resource-test") {
             steps {
                 script {
-                    libs.testresource.testresource()
+                    libs.testresource.testResource()
                 }
             }
         }
