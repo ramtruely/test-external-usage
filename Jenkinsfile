@@ -75,5 +75,9 @@ pipeline {
             steps {
                 script {
                     libs.validate.deployApp()
+                }
+            }
+
+        }   
     }   
 }
