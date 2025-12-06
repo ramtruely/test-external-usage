@@ -1,21 +1,17 @@
-// src/org/my/example/MyUtility.groovy
-import java.io.Serializable
+package util
 
 class MyUtility implements Serializable {
-    def steps
+    def script
 
-    MyUtility(steps) {
-        this.steps = steps
+    MyUtility(script) {
+        this.script = script
     }
 
     def listFiles(String dirPath) {
-        def files = steps.sh(script: "ls -1 ${dirPath}", returnStdout: true).trim().split("\n")
-        return files
+        script.sh(script: "ls -1 ${dirPath}", returnStdout: true).trim().split("\n")
     }
 
     def printFiles(String dirPath) {
-        def files = listFiles(dirPath)
-        files.each { steps.echo it }
+        listFiles(dirPath).each { script.echo it }
     }
 }
-return this
