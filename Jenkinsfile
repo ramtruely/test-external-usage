@@ -1,35 +1,41 @@
 def gv
-
-// Read parameters from YAML
-def config = readYaml file: 'parameters.yaml'
-
-// Convert YAML into Jenkins parameters
-def paramList = []
-config.parameters.each { name, map ->
-    if (map.type == 'choice') {
-        paramList << choice(name: name, choices: map.values.join('\n'))
-    }
-    if (map.type == 'boolean') {
-        paramList << booleanParam(name: name, defaultValue: map.default)
-    }
-}
-
-// Register parameters (needed for multibranch!)
-properties([
-    parameters(paramList)
-])
+def config
 
 pipeline {
     agent any
 
     stages {
-        stage("init") {
+
+        stage('init parameters') {
+            steps {
+                script {
+                    config = readYaml file: 'parameters.yaml'
+
+                    def paramList = []
+                    config.parameters.each { name, map ->
+                        if (map.type == 'choice') {
+                            paramList << choice(name: name, choices: map.values.join('\n'))
+                        }
+                        if (map.type == 'boolean') {
+                            paramList << booleanParam(name: name, defaultValue: map.default)
+                        }
+                    }
+
+                    properties([
+                        parameters(paramList)
+                    ])
+                }
+            }
+        }
+
+        stage("init scripts") {
             steps {
                 script {
                     gv = load "script.groovy"
                 }
             }
         }
+
 
         stage("build") {
             steps {
