@@ -28,26 +28,25 @@ pipeline {
             }
         }
 
-        stage("init scripts") {
+        stage("init") {
             steps {
                 script {
-                    gv = load "script.groovy"
+                   gv = load "script.groovy" 
                 }
             }
         }
-
-
         stage("build") {
             steps {
                 script {
-                    gv.buildApp(params.VERSION)
+                    gv.buildApp()
                 }
             }
         }
-
         stage("test") {
             when {
-                expression { params.executeTests }
+                expression {
+                    params.executeTests
+                }
             }
             steps {
                 script {
@@ -55,13 +54,12 @@ pipeline {
                 }
             }
         }
-
         stage("deploy") {
             steps {
                 script {
-                    gv.deployApp(params.VERSION)
+                    gv.deployApp()
                 }
             }
         }
-    }
+    }   
 }
