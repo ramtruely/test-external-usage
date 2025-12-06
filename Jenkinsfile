@@ -11,15 +11,9 @@ pipeline {
         stage('Init') {
             steps {
                 script {
-                    // Load other Groovy vars
-                    def buildVar = load('vars/build.groovy')
-                    def deployVar = load('vars/deploy.groovy')
-                    def testVar = load('vars/test.groovy')
-                    def validateVar = load('vars/validate.groovy')
-                    def loaderVar = load('vars/loader.groovy')
-
-                    // Load classes safely
+                    def loaderVar = load('crc/com/loader.groovy')
                     def classes = loaderVar.loadClasses()
+
                     env.utility = classes['Utility']
                     env.helper  = classes['Helper']
                 }
