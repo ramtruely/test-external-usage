@@ -74,7 +74,7 @@ pipeline {
         stage("validate") {
             steps {
                 script {
-                    libs.validate.deployApp()
+                    libs.validate.validateApp()
                 }
             }
 
