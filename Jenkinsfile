@@ -45,7 +45,7 @@ pipeline {
                 script {
                     // get instances from loader (no classloader usage)
                     def util = libs.loader.get('Utility', 'DEV')
-                    util.printEnv()
+                    util.printEnv(env)
                     echo util.getEnvInfo()
 
                     def helper = libs.loader.get('Helper', 'Ram')
