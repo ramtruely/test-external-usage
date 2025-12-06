@@ -70,5 +70,10 @@ pipeline {
                 }
             }
         }
+
+        stage("validate") {
+            steps {
+                script {
+                    libs.validate.deployApp()
     }   
 }
