@@ -1,23 +1,14 @@
 // vars/loader.groovy
-def call() {
-    return this
+
+// Method to load a class from src/com/mntz dynamically
+def get(className, Object... args) {
+    // Full package name
+    def fullClassName = "com.mntz.${className}"
+    // Load class
+    def cls = this.class.classLoader.loadClass(fullClassName)
+    // Instantiate with constructor arguments
+    return cls.newInstance(*args)
 }
 
-// Dynamically load a class from src/com/mntz/
-def get(String className, Object... args) {
-    // Build path to the groovy file
-    def path = "src/com/mntz/${className}.groovy"
-
-    // Load the groovy file
-    def clsScript = load path
-
-    // Create an instance of the class (assumes default constructor or parameters)
-    def instance
-    if(args) {
-        instance = clsScript.newInstance(*args)
-    } else {
-        instance = clsScript.newInstance()
-    }
-
-    return instance
-}
+// Return this object to make methods accessible
+return this
