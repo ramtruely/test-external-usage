@@ -7,11 +7,7 @@ class Utility implements Serializable {
         this.env = env
     }
 
-    def printEnv() {
-        println "Current environment is ${env}"
-    }
-
-    def staticHello() {
-        println "Hello from Utility"
+    def doSomething() {
+        return "Utility doing something in environment: ${env}"
     }
 }
