@@ -8,7 +8,7 @@ def runTestSh() {
         sh 'chmod +x test.sh'
         sh './test.sh'
     } else {
-        bat 'bash test.sh'
+        bat 'bat '"C:\\Program Files\\Git\\bin\\bash.exe" test.sh'
     }
 }
 
