@@ -1,25 +1,24 @@
-class UtilityImpl implements Serializable {
-    String env
-    UtilityImpl(String env) { this.env = env }
-    def printEnv() { println "UtilityImpl env=${env}" }
-    def getEnvInfo() { return "Environment info: ${env}" }
-}
+package org.my.example
 
-// factory function exposed to caller
-def create(String env) {
-    return new UtilityImpl(env)
-}
+class MyUtility {
 
-// return this script object so load(...) returns something useful
-return thispackage org.my.example
-
-class MyHelper implements Serializable {
-
-    def sayHello(String name) {
-        return "Hello " + name
+    // Print a custom message
+    def printMessage(String message) {
+        println "Message: ${message}"
     }
 
+    // Example: simple addition method
     def addNumbers(int a, int b) {
-        return a + b
+        int result = a + b
+        println "Addition Result: ${result}"
+        return result
+    }
+
+    // Example: check if a file exists in workspace
+    def fileExists(String filePath) {
+        def file = new File(filePath)
+        boolean exists = file.exists()
+        println "File '${filePath}' exists? ${exists}"
+        return exists
     }
 }
