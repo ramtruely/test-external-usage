@@ -1,19 +1,20 @@
-package org.my.example
+// src/org/my/example/MyHelper.groovy
+import java.io.Serializable
 
-// Non-shared lib, sandbox-safe helper
-class MyHelper {
+class MyHelper implements Serializable {
+    def steps  // reference to Jenkins pipeline steps
 
-    // Prints some basic environment variables
-    def printEnv() {
-        // env is automatically visible in Jenkins pipeline context
-        println "JOB_NAME: ${env.JOB_NAME}"
-        println "BUILD_NUMBER: ${env.BUILD_NUMBER}"
-        println "NODE_NAME: ${env.NODE_NAME}"
-        println "WORKSPACE: ${env.WORKSPACE}"
+    MyHelper(steps) {
+        this.steps = steps
     }
 
-    // Example method to simulate some logic
-    def sayHello(String name) {
-        println "Hello, ${name}! Welcome to Jenkins."
+    def printEnv() {
+        steps.echo "Workspace: ${steps.env.WORKSPACE}"
+        steps.echo "Build Number: ${steps.env.BUILD_NUMBER}"
+    }
+
+    def printMessage(String msg) {
+        steps.echo "Message: ${msg}"
     }
 }
+return this
