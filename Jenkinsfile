@@ -1,5 +1,3 @@
-@Library('fact-lib@1.1.0') _
-
 pipeline {
     agent any
 
