@@ -1,47 +1,25 @@
+@Library('fact-lib@1.1.0') _
+
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    NEXUS_LIB = "http://localhost:8081/repository/maven-shared-lib/com/fact/1.1.0/fact-1.1.0-lib.zip"
-  }
+    stages {
+        stage('Load Shared Library from Nexus') {
+            steps {
+                script {
+                    // Explicit library retrieval from Nexus using HTTPS
+                    library identifier: 'fact-lib@1.1.0',
+                            retriever: nexus(
+                                artifactDetails: 'com.fact:fact:1.1.0:zip:lib',
+                                nexusUrl: 'https://nexus.example.com/repository/maven-shared-lib/',
+                                credentialsId: 'nexus-https-creds',  // Jenkins credential for Nexus username/password
+                                mavenHome: 'C:\\tools\\apache-maven-3.8.8'  // path to Maven on agent
+                            )
 
-  stages {
-    stage('Download Shared Lib') {
-      steps {
-        script {
-          bat """
-            curl -u admin:admin -o sharedlib.zip %NEXUS_LIB%
-            rmdir /S /Q .shared 2>nul
-            mkdir .shared
-            tar -xf sharedlib.zip -C .shared
-          """
+                    // Example usage from vars/hello.groovy
+                    example1()
+                }
+            }
         }
-      }
     }
-
-    stage('Load Shared') {
-      steps {
-        script {
-          library(
-            identifier: "my-shared-lib@1.1.0",
-            retriever: [
-              $class: 'SCMSourceRetriever',
-              scm: [
-                $class: 'DirectorySCM',
-                directory: "${env.WORKSPACE}\\.shared"
-              ]
-            ]
-          )
-        }
-      }
-    }
-
-    stage('Test') {
-      steps {
-        script {
-          example1()
-        }
-      }
-    }
-  }
 }
