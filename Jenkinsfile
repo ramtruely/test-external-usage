@@ -1,4 +1,4 @@
-@Library(
+library(
     identifier: 'external-shared-libraries@1.1.0',
     retriever: nexus(
         artifactDetails: 'com.fact:fact-lib:1.1.0:zip:lib', 
