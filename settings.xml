@@ -1,0 +1,46 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <servers>
+        <!-- Nexus Credentials -->
+        <server>
+            <id>nexus-shared-lib</id> <!-- This ID will be used in your Maven repo URL -->
+            <username>admin</username> <!-- replace with your Nexus username -->
+            <password>admin</password> <!-- replace with your Nexus password -->
+        </server>
+    </servers>
+
+    <mirrors>
+        <!-- Mirror all repos through Nexus if needed -->
+        <mirror>
+            <id>nexus</id>
+            <mirrorOf>*</mirrorOf>
+            <url>http://localhost:8081/repository/maven-shared-lib/</url>
+        </mirror>
+    </mirrors>
+
+    <profiles>
+        <profile>
+            <id>nexus</id>
+            <repositories>
+                <repository>
+                    <id>nexus-shared-lib</id>
+                    <url>http://localhost:8081/repository/maven-shared-lib/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>nexus</activeProfile>
+    </activeProfiles>
+
+</settings>
