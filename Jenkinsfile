@@ -1,48 +1,36 @@
 pipeline {
   agent any
 
-  libraries {
-    lib("my-shared-lib@1.1.0")
-  }
-
-  options {
-    skipDefaultCheckout true
-  }
-
   environment {
     NEXUS_URL = "http://localhost:8081/repository/maven-shared-lib/com/fact/1.1.0/fact-1.1.0-lib.zip"
   }
 
   stages {
-    stage('Load Shared Library') {
+    stage('Load Shared Lib From Nexus') {
       steps {
         script {
-          // download zip
           sh """
             curl -u admin:admin -o sharedlib.zip $NEXUS_URL
+            rm -rf .shared
+            mkdir .shared
+            unzip -o sharedlib.zip -d .shared
           """
 
-          // unzip to workspace
-          sh """
-            unzip -o sharedlib.zip -d sharedlib
-          """
-
-          // add this folder to library path
-          library identifier: "my-shared-lib@1.1.0",
+          library(
+            identifier: "my-shared-lib@1.1.0",
             retriever: modernSCM(
-              [$class: 'LegacySCMSource', scm: [
-                $class: 'hudson.scm.SubversionSCM',
-                locations: [[remote: "file://${WORKSPACE}/sharedlib"]]
-              ]]
+              [$class: 'DirectorySCMSource',
+               directory: "${env.WORKSPACE}/.shared"]
             )
+          )
         }
       }
     }
 
-    stage('Run shared function') {
-      steps {
-        script {
-          example1()
+    stage('Test Call') {
+      steps{
+        script{
+          example1() 
         }
       }
     }
