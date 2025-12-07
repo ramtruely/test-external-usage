@@ -9,18 +9,17 @@ pipeline {
     stage('Load Shared Lib From Nexus') {
       steps {
         script {
-          sh """
-            curl -u admin:admin -o sharedlib.zip $NEXUS_URL
-            rm -rf .shared
+          bat """
+            curl -u admin:admin -o sharedlib.zip %NEXUS_URL%
+            rmdir /S /Q .shared
             mkdir .shared
-            unzip -o sharedlib.zip -d .shared
+            tar -xf sharedlib.zip -C .shared
           """
 
           library(
             identifier: "my-shared-lib@1.1.0",
             retriever: modernSCM(
-              [$class: 'DirectorySCMSource',
-               directory: "${env.WORKSPACE}/.shared"]
+              [$class: 'DirectorySCMSource', directory: "${env.WORKSPACE}\\.shared"]
             )
           )
         }
@@ -30,7 +29,7 @@ pipeline {
     stage('Test Call') {
       steps{
         script{
-          example1() 
+          example1()
         }
       }
     }
