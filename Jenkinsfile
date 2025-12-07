@@ -1,110 +1,50 @@
-def libs
-def config
-
 pipeline {
-    agent any
+  agent any
 
-    stages {
+  libraries {
+    lib("my-shared-lib@1.1.0")
+  }
 
-        stage('init parameters') {
-            steps {
-                script {
-                    config = readYaml file: 'devops/parameters.yaml'
+  options {
+    skipDefaultCheckout true
+  }
 
-                    def paramList = []
-                    config.parameters.each { name, map ->
-                        if (map.type == 'choice') {
-                            paramList << choice(name: name, choices: map.values.join('\n'))
-                        }
-                        if (map.type == 'boolean') {
-                            paramList << booleanParam(name: name, defaultValue: map.default)
-                        }
-                    }
+  environment {
+    NEXUS_URL = "http://localhost:8081/repository/maven-shared-lib/com/fact/1.1.0/fact-1.1.0-lib.zip"
+  }
 
-                    properties([
-                        parameters(paramList)
-                    ])
-                }
-            }
+  stages {
+    stage('Load Shared Library') {
+      steps {
+        script {
+          // download zip
+          sh """
+            curl -u admin:admin -o sharedlib.zip $NEXUS_URL
+          """
+
+          // unzip to workspace
+          sh """
+            unzip -o sharedlib.zip -d sharedlib
+          """
+
+          // add this folder to library path
+          library identifier: "my-shared-lib@1.1.0",
+            retriever: modernSCM(
+              [$class: 'LegacySCMSource', scm: [
+                $class: 'hudson.scm.SubversionSCM',
+                locations: [[remote: "file://${WORKSPACE}/sharedlib"]]
+              ]]
+            )
         }
-
-        stage("init") {
-            steps {
-                script {
-                    libs = [:]
-                    def files = findFiles(glob: 'vars/*.groovy')
-                    files.each { file ->
-                        def name = file.name.replace('.groovy','')
-                        libs[name] = load file.path
-                    }
-                }
-            }
-        }
-         stage('Init src') {
-            steps {
-                script {
-                    // Use loader to get instances
-                    def myHelper = loader.loadHelper(this)
-                    def myUtil = loader.loadUtility(this)
-
-                    myHelper.printEnv()
-                    myHelper.printMessage("Hello from Loader!")
-
-                    myUtil.printFiles("${env.WORKSPACE}")
-                }
-            }
-        }
-
-        stage("resource-test") {
-            steps {
-                script {
-                    libs.testresource.testResource()
-                }
-            }
-        }
-        stage("test-sh") {
-            steps {
-                script {
-                    libs.testsh.runTestSh()
-        }
+      }
     }
-}
 
-        stage("build") {
-            steps {
-                script {
-                    libs.build.buildApp()
-                }
-            }
+    stage('Run shared function') {
+      steps {
+        script {
+          example1()
         }
-
-        stage("test") {
-            when {
-                expression {
-                    params.executeTests
-                }
-            }
-            steps {
-                script {
-                    libs.test.testApp()
-                }
-            }
-        }
-
-        stage("deploy") {
-            steps {
-                script {
-                    libs.deploy.deployApp()
-                }
-            }
-        }
-
-        stage("validate") {
-            steps {
-                script {
-                    libs.validate.validateApp()
-                }
-            }
-        }
+      }
     }
+  }
 }
