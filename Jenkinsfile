@@ -1,26 +1,20 @@
 pipeline {
     agent any
-
     stages {
-        stage('Load Shared Library from Nexus') {
+        stage('Load Shared Lib') {
             steps {
                 script {
-                    library(
-                        identifier: 'external-shared-libraries@1.1.0',
-                        retriever: nexus(
-                            artifactDetails: 'com.fact:fact-lib:1.1.0:zip:lib',
-                            // Use Maven root folder, the plugin will append /bin/mvn
-                            mavenHome: 'C:\\ProgramData\\chocolatey\\lib\\maven\\apache-maven-3.9.11'
-                        )
-                    )
+                    library identifier: 'my-nexus-lib@1.0.0',
+                            retriever: nexus(
+                                artifactDetails: 'com.example:shared-lib:1.0.0:zip:lib',  // Your GAVC
+                                mavenHome: 'C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.11'  // Run `mvn -v` for path
+                            )
                 }
             }
         }
-
-        stage('Use Library') {
+        stage('Use Lib') {
             steps {
                 script {
-                    // Example usage
                     example1()
                 }
             }
