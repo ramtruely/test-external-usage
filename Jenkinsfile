@@ -1,21 +1,55 @@
 pipeline {
     agent any
 
+    environment {
+        MAVEN_HOME = 'C:\\ProgramData\\chocolatey\\lib\\maven\\apache-maven-3.9.11'
+        PATH = "${MAVEN_HOME}\\bin;${env.PATH}"
+        NEXUS_URL = 'http://localhost:8081/repository/maven-shared-lib/'
+        ARTIFACT = 'com.fact:fact:1.1.0:zip:lib'
+        LOCAL_LIB_DIR = '.shared'
+    }
+
     stages {
-        stage('Load Shared Library from Nexus') {
+        stage('Download Shared Library from Nexus') {
             steps {
                 script {
-                    // Explicit library retrieval from Nexus using HTTPS
-                    library identifier: 'fact-lib@1.1.0',
-                            retriever: nexus(
-                                artifactDetails: 'com.fact:fact:1.1.0:zip:lib',
-                                nexusUrl: 'https://nexus.example.com/repository/maven-shared-lib/',
-                                credentialsId: 'nexus-https-creds',  // Jenkins credential for Nexus username/password
-                                mavenHome: 'C:\\tools\\apache-maven-3.8.8'  // path to Maven on agent
-                            )
+                    // Clean old library
+                    bat "rmdir /S /Q ${env.LOCAL_LIB_DIR} 2>nul || echo No previous library"
 
-                    // Example usage from vars/hello.groovy
-                    example1()
+                    bat "mkdir ${env.LOCAL_LIB_DIR}"
+
+                    // Use Maven dependency:get to download the zip
+                    bat """
+                    "${MAVEN_HOME}\\bin\\mvn" dependency:get ^
+                        -Dartifact=${env.ARTIFACT} ^
+                        -Ddest=${env.LOCAL_LIB_DIR}\\sharedlib.zip ^
+                        -DremoteRepositories=${env.NEXUS_URL}
+                    """
+
+                    // Extract the zip using PowerShell
+                    bat "powershell -Command \"Expand-Archive -LiteralPath '${env.LOCAL_LIB_DIR}\\sharedlib.zip' -DestinationPath '${env.LOCAL_LIB_DIR}' -Force\""
+                }
+            }
+        }
+
+        stage('Load Shared Library Explicitly') {
+            steps {
+                script {
+                    // Explicitly load the library from folder
+                    library identifier: 'fact-lib@1.1.0',
+                        retriever: legacySCM(
+                            [$class: 'DirectorySCM', directory: "${env.WORKSPACE}\\${env.LOCAL_LIB_DIR}"]
+                        )
+                }
+            }
+        }
+
+        stage('Test Shared Library') {
+            steps {
+                script {
+                    // Example usage of a vars method or class
+                    echo "Calling shared library function:"
+                    mySharedVar() // replace with your actual method or variable from the library
                 }
             }
         }
