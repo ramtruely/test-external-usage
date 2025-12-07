@@ -1,39 +1,45 @@
 pipeline {
   agent any
 
+  environment {
+    NEXUS_LIB = "http://localhost:8081/repository/maven-shared-lib/com/fact/1.1.0/fact-1.1.0-lib.zip"
+  }
+
   stages {
-    
-    stage('Load Shared Lib From Nexus') {
+    stage('Download Shared Lib') {
       steps {
         script {
-          sh """
-            curl -u admin:admin \
-             -o sharedlib.zip \
-             http://localhost:8081/repository/maven-shared-lib/com/fact/1.1.0/fact-1.1.0-lib.zip
-
-            rm -rf .shared
+          bat """
+            curl -u admin:admin -o sharedlib.zip %NEXUS_LIB%
+            rmdir /S /Q .shared 2>nul
             mkdir .shared
-            unzip sharedlib.zip -d .shared
+            tar -xf sharedlib.zip -C .shared
           """
         }
-
-        library(
-          identifier: "my-shared-lib@1.1.0",
-          retriever: [
-            $class: 'SCMSourceRetriever',
-            scm: [
-              $class: 'DirectorySCM',
-              directory: "${env.WORKSPACE}/.shared"
-            ]
-          ]
-        )
       }
     }
 
-    stage('Test Call') {
+    stage('Load Shared') {
       steps {
         script {
-          example1()    
+          library(
+            identifier: "my-shared-lib@1.1.0",
+            retriever: [
+              $class: 'SCMSourceRetriever',
+              scm: [
+                $class: 'DirectorySCM',
+                directory: "${env.WORKSPACE}\\.shared"
+              ]
+            ]
+          )
+        }
+      }
+    }
+
+    stage('Test') {
+      steps {
+        script {
+          example1()
         }
       }
     }
